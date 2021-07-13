@@ -1,0 +1,9 @@
+name: CompassTracker
+author: arisamiga
+version: 1.0
+main: me.arisamiga.CompassTracker.Main
+
+commands:
+  help-ct:
+  finder:
+  hider:

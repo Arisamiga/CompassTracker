@@ -19,4 +19,6 @@ Use `/hider (username)` to add a person for the compass to follow
 
 Use `/finder (username)` to add the person that has the compass
 
+Use `/players` to see who is a Hider and who is a Finder!
+
 To reset the pairs do `/reload` to reload the plugin.

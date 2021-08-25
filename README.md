@@ -7,11 +7,11 @@ This is one of my first projects with Java! Any feedback would be very appreciat
 
 # Installation
 
-First install the .java file.
+First install the .jar file from the releases or from the spigot page [here](https://www.spigotmc.org/resources/compasstracker.95662/).
 
 Then move that file to the `/plugins` folder inside your server!
 
-If you see a message like `Successfully loaded CompassTracker!!` on the console that means you installed it correctly!! 
+If you see a message like `Successfully loaded CompassTracker!!` on the console that means you installed it correctly!!
 
 # How to use
 

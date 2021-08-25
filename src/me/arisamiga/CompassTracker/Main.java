@@ -25,9 +25,10 @@ public class Main extends JavaPlugin {
 	}
 
 	public static LinkedList<Player> hider = new LinkedList<Player>();
+	public static LinkedList<Player> finders = new LinkedList<Player>();
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		// /hello <-- Hey welcome!
+		// help command
 		if (label.equals("help-ct")) {
 			if (sender instanceof Player) {
 				// player
@@ -38,7 +39,9 @@ public class Main extends JavaPlugin {
 						+ " to add a person for the compass to follow");
 				player.sendMessage("Use /finder " + ChatColor.GRAY + "" + "(username)" + ChatColor.WHITE + ""
 						+ " to add the person that has the compass");
-				player.sendMessage("To reset the roles you should use /reload.");
+				player.sendMessage(
+						"Use /players" + ChatColor.WHITE + "" + " to see who is a Hider and who is a Finder.");
+				player.sendMessage(ChatColor.GRAY + "" + "To reset the roles you should use /reload.");
 				return true;
 			} else {
 				// console
@@ -52,40 +55,45 @@ public class Main extends JavaPlugin {
 				// player
 				Player player = (Player) sender;
 				ItemStack[] items = { new ItemStack(Material.COMPASS) };
-				if (args.length == 0) {
-					if (hider.isEmpty()) {
-						player.sendMessage(ChatColor.RED + "" + "You need to first add a hider.");
-					} else {
-						player.sendMessage(ChatColor.RED + "" + "You are a finder!");
-						player.getInventory().addItem(items);
-						Bukkit.broadcastMessage(ChatColor.RED + "" + player.getName() + " Is now a Finder!");
-						new Timer().scheduleAtFixedRate(new TimerTask() {
-							@Override
-							public void run() {
-								player.setCompassTarget(hider.get(0).getLocation());
-							}
-						}, 0, 1000);
-					}
+				if (finders.contains(Bukkit.getPlayerExact(args[0]))) {
+					player.sendMessage(ChatColor.RED + "" + "You are already a finder.");
 				} else {
-					// Player typed something more
-					Player target = Bukkit.getPlayerExact(args[0]);
-					if (target == null) {
-						// Target is not online
-						player.sendMessage(args[0] + " is not online!");
-					} else {
-						// Targets online
+					if (args.length == 0) {
 						if (hider.isEmpty()) {
 							player.sendMessage(ChatColor.RED + "" + "You need to first add a hider.");
 						} else {
-							target.sendMessage(ChatColor.RED + "" + "You are a finder!");
-							target.getInventory().addItem(items);
-							Bukkit.broadcastMessage(ChatColor.RED + "" + target.getName() + " Is now a Finder!");
+							player.sendMessage(ChatColor.RED + "" + "You are a finder!");
+							player.getInventory().addItem(items);
+							Bukkit.broadcastMessage(ChatColor.RED + "" + player.getName() + " Is now a Finder!");
 							new Timer().scheduleAtFixedRate(new TimerTask() {
 								@Override
 								public void run() {
-									target.setCompassTarget(hider.get(0).getLocation());
+									player.setCompassTarget(hider.get(0).getLocation());
 								}
 							}, 0, 1000);
+						}
+					} else {
+						// Player typed something more
+						Player target = Bukkit.getPlayerExact(args[0]);
+						if (target == null) {
+							// Target is not online
+							player.sendMessage(args[0] + " is not online!");
+						} else {
+							// Targets online
+							if (hider.isEmpty()) {
+								player.sendMessage(ChatColor.RED + "" + "You need to first add a hider.");
+							} else {
+								target.sendMessage(ChatColor.RED + "" + "You are a finder!");
+								target.getInventory().addItem(items);
+								Bukkit.broadcastMessage(ChatColor.RED + "" + target.getName() + " Is now a Finder!");
+								finders.push(target);
+								new Timer().scheduleAtFixedRate(new TimerTask() {
+									@Override
+									public void run() {
+										target.setCompassTarget(hider.get(0).getLocation());
+									}
+								}, 0, 1000);
+							}
 						}
 					}
 				}
@@ -99,26 +107,59 @@ public class Main extends JavaPlugin {
 		if (label.equals("hider")) {
 			Player player = (Player) sender;
 			if (sender instanceof Player) {
-				if (args.length == 0) {
-					// player
-					player.sendMessage(ChatColor.RED + "" + "You are a Hider!");
-					hider.push(player);
-					Bukkit.broadcastMessage(ChatColor.RED + "" + player.getName() + " Is now a hider!");
+				if (hider.isEmpty() != true) {
+					player.sendMessage(ChatColor.RED + "" + "You cannot have more than 1 hider.");
 				} else {
-					// Player typed something more
-					Player target = Bukkit.getPlayerExact(args[0]);
-					if (target == null) {
-						// Target is not online
-						player.sendMessage(args[0] + " is not online!");
-					} else {
-						// Targets online
+					if (args.length == 0) {
 						// player
-						target.sendMessage(ChatColor.RED + "" + "You are a Hider!");
-						hider.push(target);
-						Bukkit.broadcastMessage(ChatColor.RED + "" + target.getName() + " Is now a hider!");
+						player.sendMessage(ChatColor.RED + "" + "You are a Hider!");
+						hider.push(player);
+						Bukkit.broadcastMessage(ChatColor.RED + "" + player.getName() + " Is now a hider!");
+					} else {
+						// Player typed something more
+						Player target = Bukkit.getPlayerExact(args[0]);
+						if (target == null) {
+							// Target is not online
+							player.sendMessage(args[0] + " is not online!");
+						} else {
+							// Targets online
+							// player
+							target.sendMessage(ChatColor.RED + "" + "You are a Hider!");
+							hider.push(target);
+							Bukkit.broadcastMessage(ChatColor.RED + "" + target.getName() + " Is now a hider!");
+						}
 					}
 				}
 
+			} else {
+				// console
+				sender.sendMessage("You cant use this plugin in console.");
+				return true;
+			}
+
+		}
+		// /player list!
+		if (label.equals("players")) {
+			if (sender instanceof Player) {
+				// player
+				Player player = (Player) sender;
+				player.sendMessage("-----------------------------------");
+				if (hider.isEmpty() == true) {
+					player.sendMessage(ChatColor.GRAY + "" + "(Hiders) " + ChatColor.WHITE + "" + "No Hiders");
+				} else {
+					player.sendMessage(ChatColor.GRAY + "" + "(Hiders) ");
+					player.sendMessage(ChatColor.WHITE + "" + hider.get(0).getDisplayName());
+				}
+				if (finders.isEmpty() == true) {
+					player.sendMessage(ChatColor.GRAY + "" + "(Finders) " + ChatColor.WHITE + "" + "No Finders");
+				} else {
+					player.sendMessage(ChatColor.GRAY + "" + "(Finders) ");
+					for (int i = 0; i < finders.size(); i++) {
+						player.sendMessage(ChatColor.WHITE + "" + finders.get(i).getDisplayName());
+					}
+				}
+				player.sendMessage(ChatColor.GRAY + "" + "To reset the roles you should use /reload.");
+				return true;
 			} else {
 				// console
 				sender.sendMessage("You cant use this plugin in console.");
@@ -130,5 +171,4 @@ public class Main extends JavaPlugin {
 		return false;
 
 	}
-
 }
